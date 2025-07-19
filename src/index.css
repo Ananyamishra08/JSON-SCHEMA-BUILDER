@@ -1,0 +1,27 @@
+.builder-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically if you want */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.builder-card {
+  width: 400px; /* Increase width as needed */
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.field-input {
+  flex: 1; /* Takes remaining space */
+  min-width: 200px;
+}
