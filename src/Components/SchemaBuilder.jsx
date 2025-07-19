@@ -1,67 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { Button, Row, Col } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import FieldRow from './FieldRow';
 
-function SchemaBuilder() {
-  const { control, register, watch } = useForm({
-    defaultValues: { fields: [] }
-  });
+const SchemaBuilder = () => {
+  const { control, register } = useForm({ defaultValues: { fields: [] } });
+  const { fields, append, remove } = useFieldArray({ control, name: 'fields' });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'fields'
-  });
-
-  const watchFields = watch('fields');
-
+  const watchedFields = useWatch({ control, name: 'fields' });
   const [jsonPreview, setJsonPreview] = useState({});
 
-  useEffect(() => {
-    const buildSchema = (arr) => {
-      const schema = {};
-      arr.forEach((f) => {
-        if (!f.name) return;
-        if (f.type === 'nested' && Array.isArray(f.children)) {
-          schema[f.name] = buildSchema(f.children);
-        } else {
-          schema[f.name] = f.type || '';
-        }
-      });
-      return schema;
-    };
+  const generateJson = (fields) => {
+    const result = {};
+    fields?.forEach((field) => {
+      if (!field?.name?.trim()) return;
 
-    setJsonPreview(buildSchema(watchFields || []));
-  }, [watchFields]);
+      if (field.type === 'object' && Array.isArray(field.children)) {
+        result[field.name.trim()] = generateJson(field.children);
+      } else {
+        let val = field.value;
+        if (field.type === 'number') val = Number(val);
+        if (field.type === 'boolean') val = val === 'true' || val === true;
+        result[field.name.trim()] = val ?? '';
+      }
+    });
+    return result;
+  };
+
+  useEffect(() => {
+    if (watchedFields) {
+      setJsonPreview(generateJson(watchedFields));
+    }
+  }, [watchedFields]);
 
   return (
-    <Row gutter={16}>
-      <Col span={12}>
-        {fields.map((item, index) => (
-          <FieldRow
-            key={item.id}
-            nestIndex={index}
-            control={control}
-            register={register}
-            remove={remove}
-            parentName="fields"
-          />
-        ))}
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => append({ name: '', type: 'string', children: [] })}
-          style={{ marginTop: 16 }}
-        >
-          Add Item
-        </Button>
-      </Col>
-      <Col span={12}>
-        <pre>{JSON.stringify(jsonPreview, null, 2)}</pre>
-      </Col>
-    </Row>
+    <div style={{ padding: '20px' }}>
+      <h2>JSON Schema Builder</h2>
+
+      {fields.map((field, index) => (
+        <FieldRow
+          key={field.id}
+          nestIndex={index}
+          control={control}
+          register={register}
+          parentName="fields"
+          remove={remove}
+        />
+      ))}
+
+      <button onClick={() => append({ name: '', type: 'string', value: '', children: [] })}>
+        Add Field
+      </button>
+
+      <h3>Live JSON Preview</h3>
+      <pre style={{ background: '#f0f0f0', padding: '10px' }}>
+        {JSON.stringify(jsonPreview, null, 2)}
+      </pre>
+    </div>
   );
-}
+};
 
 export default SchemaBuilder;

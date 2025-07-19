@@ -1,69 +1,79 @@
 import React from 'react';
-import { Input, Select, Switch, Button, Space, Card } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useFieldArray, Controller, useWatch } from 'react-hook-form';
+import { useFieldArray, useWatch } from 'react-hook-form';
 
-const { Option } = Select;
+const FieldRow = ({ nestIndex, control, register, parentName, remove }) => {
+  const fieldName = `${parentName}[${nestIndex}]`;
+  const fieldType = useWatch({ control, name: `${fieldName}.type` });
+  const childFieldName = `${fieldName}.children`;
 
-function FieldRow({ nestIndex, control, register, remove, parentName }) {
-  const fieldPath = `${parentName}[${nestIndex}]`;
-
-  const type = useWatch({
+  const {
+    fields: childFields,
+    append: appendChild,
+    remove: removeChild,
+  } = useFieldArray({
     control,
-    name: `${fieldPath}.type`
-  });
-
-  const { fields, append, remove: removeNested } = useFieldArray({
-    control,
-    name: `${fieldPath}.children`
+    name: childFieldName,
   });
 
   return (
-    <Card size="small" style={{ marginTop: 8 }}>
-      <Space style={{ display: 'flex', alignItems: 'center'}}>
-        <Input {...register(`${fieldPath}.name`)} placeholder="Field Name" style={{ width: 200 }} />
-        <Controller
-          control={control}
-          name={`${fieldPath}.type`}
-          render={({ field }) => (
-            <Select {...field} style={{ width: 150 }}>
-              <Option value="string">String</Option>
-              <Option value="number">Number</Option>
-              <Option value="nested">Nested</Option>
-              <Option value="objectId">ObjectId</Option>
-              <Option value="float">Float</Option>
-              <Option value="boolean">Boolean</Option>
-            </Select>
-          )}
-        />
-        <Switch />
-        <MinusCircleOutlined onClick={() => remove(nestIndex)} />
-      </Space>
+    <div
+      style={{
+        marginLeft: '20px',
+        borderLeft: '2px solid #ddd',
+        paddingLeft: '10px',
+        marginBottom: '10px',
+      }}
+    >
+      <input
+        placeholder="Key"
+        {...register(`${fieldName}.name`)}
+        style={{ marginRight: '10px' }}
+      />
 
-      {type === 'nested' && (
-        <div style={{ marginLeft: 24, marginTop: 8 }}>
-          {fields.map((item, index) => (
+      <select {...register(`${fieldName}.type`)} style={{ marginRight: '10px' }}>
+        <option value="string">String</option>
+        <option value="number">Number</option>
+        <option value="boolean">Boolean</option>
+        <option value="object">Nested</option>
+      </select>
+
+      {fieldType !== 'object' && (
+        <input
+          placeholder="Value"
+          {...register(`${fieldName}.value`)}
+          style={{ marginRight: '10px' }}
+        />
+      )}
+
+      <button type="button" onClick={() => remove(nestIndex)}>
+        Remove
+      </button>
+
+      {fieldType === 'object' && (
+        <div style={{ marginTop: '10px' }}>
+          {childFields.map((child, index) => (
             <FieldRow
-              key={item.id}
+              key={child.id}
               nestIndex={index}
               control={control}
               register={register}
-              remove={removeNested}
-              parentName={`${fieldPath}.children`}
+              parentName={`${fieldName}.children`}
+              remove={removeChild}
             />
           ))}
-          <Button
-            type="dashed"
-            icon={<PlusOutlined />}
-            onClick={() => append({ name: '', type: 'string', children: [] })}
-            style={{ marginTop: 8 }}
+          <button
+            type="button"
+            onClick={() =>
+              appendChild({ name: '', type: 'string', value: '', children: [] })
+            }
+            style={{ marginTop: '5px' }}
           >
-            Add Nested Item
-          </Button>
+            Add Nested Field
+          </button>
         </div>
       )}
-    </Card>
+    </div>
   );
-}
+};
 
 export default FieldRow;
