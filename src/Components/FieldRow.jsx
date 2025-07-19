@@ -6,73 +6,67 @@ const FieldRow = ({ nestIndex, control, register, parentName, remove }) => {
   const fieldType = useWatch({ control, name: `${fieldName}.type` });
   const childFieldName = `${fieldName}.children`;
 
-  const {
-    fields: childFields,
-    append: appendChild,
-    remove: removeChild,
-  } = useFieldArray({
+  const { fields: childFields, append: appendChild, remove: removeChild } = useFieldArray({
     control,
     name: childFieldName,
   });
 
   return (
-    <div
-      style={{
-        marginLeft: '20px',
-        borderLeft: '2px solid #ddd',
-        paddingLeft: '10px',
-        marginBottom: '10px',
-      }}
-    >
+   <div className="ml-5 border-l-2 border-gray-300 pl-4 mb-4">
+  <div className="flex flex-wrap items-center gap-2 mb-2">
+    <input
+      placeholder="Key"
+      {...register(`${fieldName}.name`)}
+      className="border px-2 py-1 rounded w-32"
+    />
+
+{fieldType !== 'object' && (
       <input
-        placeholder="Key"
-        {...register(`${fieldName}.name`)}
-        style={{ marginRight: '10px' }}
+        placeholder="Value"
+        {...register(`${fieldName}.value`)}
+        className="border px-2 py-1 rounded w-32"
       />
+    )}
 
-      <select {...register(`${fieldName}.type`)} style={{ marginRight: '10px' }}>
-        <option value="string">String</option>
-        <option value="number">Number</option>
-        <option value="boolean">Boolean</option>
-        <option value="object">Nested</option>
-      </select>
+    <select {...register(`${fieldName}.type`)} className="border px-2 py-1 rounded w-32">
+      <option value="string">String</option>
+      <option value="number">Number</option>
+      <option value="boolean">Boolean</option>
+      <option value="object">Nested</option>
+    </select>
 
-      {fieldType !== 'object' && (
-        <input
-          placeholder="Value"
-          {...register(`${fieldName}.value`)}
-          style={{ marginRight: '10px' }}
+    <button
+      type="button"
+      onClick={() => remove(nestIndex)}
+      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+    >
+      Remove
+    </button>
+  </div>
+
+  {fieldType === 'object' && (
+    <div className="mt-2 ml-4">
+      {childFields.map((child, index) => (
+        <FieldRow
+          key={child.id}
+          nestIndex={index}
+          control={control}
+          register={register}
+          parentName={`${fieldName}.children`}
+          remove={removeChild}
         />
-      )}
-
-      <button type="button" onClick={() => remove(nestIndex)}>
-        Remove
+      ))}
+      <button
+        type="button"
+        onClick={() => appendChild({ name: '', type: 'string', value: '', children: [] })}
+        className="mt-2 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        Add Nested Field
       </button>
-
-      {fieldType === 'object' && (
-        <div style={{ marginTop: '10px' }}>
-          {childFields.map((child, index) => (
-            <FieldRow
-              key={child.id}
-              nestIndex={index}
-              control={control}
-              register={register}
-              parentName={`${fieldName}.children`}
-              remove={removeChild}
-            />
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              appendChild({ name: '', type: 'string', value: '', children: [] })
-            }
-            style={{ marginTop: '5px' }}
-          >
-            Add Nested Field
-          </button>
-        </div>
-      )}
     </div>
+  )}
+</div>
+
   );
 };
 
