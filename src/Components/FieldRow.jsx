@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFieldArray, useWatch } from 'react-hook-form';
 
 const FieldRow = ({ nestIndex, control, register, parentName, remove }) => {
