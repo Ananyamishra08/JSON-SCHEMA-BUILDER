@@ -1,6 +1,6 @@
 # 🧩 JSON Schema Builder | ReactJS-based Dynamic Schema Generator
 An interactive, real-time JSON Schema Builder that allows users to visually construct complex JSON schemas without writing a single line of code.
-🔗 **Live Demo:** [Click here to view the project](https://github.com/Ananyamishra08/JSON-SCHEMA-BUILDER)
+> ⚡ Live Link:  [Click here to view the project](https://github.com/Ananyamishra08/JSON-SCHEMA-BUILDER)
 ---
 
 ## 🚀 Features
